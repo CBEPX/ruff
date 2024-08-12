@@ -323,7 +323,7 @@ pub struct Options {
     /// The directories to consider when resolving first- vs. third-party
     /// imports.
     ///
-    /// As an example: given a Python package structure like:
+    /// As an example, given a Python package structure like:
     ///
     /// ```text
     /// my_project
@@ -341,15 +341,17 @@ pub struct Options {
     ///
     /// When omitted, the `src` directory will typically default to the
     /// directory containing the nearest `pyproject.toml`, `ruff.toml`, or
-    /// `.ruff.toml` file (the "project root"), unless a configuration file
-    /// is explicitly provided (e.g., via the `--config` command-line flag).
+    /// `.ruff.toml` file (the "project root") along with a `"src"` subdirectory,
+    /// unless a configuration file is explicitly provided (e.g., via the
+    /// `--config` command-line flag). These defaults ensure that uv supports both
+    /// flat layouts and `src` layouts (as seen above) out of the box.
     ///
     /// This field supports globs. For example, if you have a series of Python
     /// packages in a `python_modules` directory, `src = ["python_modules/*"]`
-    /// would expand to incorporate all of the packages in that directory. User
-    /// home directory and environment variables will also be expanded.
+    /// would expand to incorporate all packages in that directory. User home
+    /// directory and environment variables will also be expanded.
     #[option(
-        default = r#"["."]"#,
+        default = r#"[".", "src"]"#,
         value_type = "list[str]",
         example = r#"
             # Allow imports relative to the "src" and "test" directories.
