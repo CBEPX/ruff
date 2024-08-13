@@ -528,6 +528,59 @@ y = 2
         ));
     }
 
+    #[test]
+    fn function_parameter_symbols() {
+        let TestCase { db, file } = test_case(
+            "
+def f(a, /, b, c=1, *args, d=2, **kwargs):
+    pass
+",
+        );
+
+        let index = semantic_index(&db, file);
+        let global_table = symbol_table(&db, global_scope(&db, file));
+
+        assert_eq!(names(&global_table), vec!["f"]);
+
+        let [(function_scope_id, _function_scope)] = index
+            .child_scopes(FileScopeId::global())
+            .collect::<Vec<_>>()[..]
+        else {
+            panic!("Expected a function scope")
+        };
+
+        let function_table = index.symbol_table(function_scope_id);
+        assert_eq!(
+            names(&function_table),
+            vec!["a", "b", "c", "args", "d", "kwargs"],
+        );
+
+        let use_def = index.use_def_map(function_scope_id);
+        for name in ["a", "b", "c", "d"] {
+            let [definition] = use_def.public_definitions(
+                function_table
+                    .symbol_id_by_name(name)
+                    .expect("symbol exists"),
+            ) else {
+                panic!("Expected parameter definition for {name}");
+            };
+            assert!(matches!(
+                definition.node(&db),
+                DefinitionKind::ParameterWithDefault(_)
+            ));
+        }
+        for name in ["args", "kwargs"] {
+            let [definition] = use_def.public_definitions(
+                function_table
+                    .symbol_id_by_name(name)
+                    .expect("symbol exists"),
+            ) else {
+                panic!("Expected parameter definition for {name}");
+            };
+            assert!(matches!(definition.node(&db), DefinitionKind::Parameter(_)));
+        }
+    }
+
     /// Test case to validate that the comprehension scope is correctly identified and that the target
     /// variable is defined only in the comprehension scope and not in the global scope.
     #[test]
