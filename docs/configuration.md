@@ -381,27 +381,8 @@ You can also change the default selection using the [`include`](settings.md#incl
 Ruff has built-in support for [Jupyter Notebooks](https://jupyter.org/).
 
 !!! info
-    Notebooks are linted and formatted by default when using [preview mode](preview.md).
+    Notebooks are linted and formatted by default from Ruff version `0.6.0` onwards.
     You can opt-out of notebook linting and formatting by adding `*.ipynb` to [`extend-exclude`](settings.md#extend-exclude).
-
-To opt in to linting and formatting Jupyter Notebook (`.ipynb`) files, add the `*.ipynb` pattern to
-your [`extend-include`](settings.md#extend-include) setting, like so:
-
-=== "pyproject.toml"
-
-    ```toml
-    [tool.ruff]
-    extend-include = ["*.ipynb"]
-    ```
-
-=== "ruff.toml"
-
-    ```toml
-    extend-include = ["*.ipynb"]
-    ```
-
-This will prompt Ruff to discover Jupyter Notebook (`.ipynb`) files in any specified
-directories, then lint and format them accordingly.
 
 If you'd prefer to either only lint or only format Jupyter Notebook files, you can use the
 section specific `exclude` option to do so. For example, the following would only lint Jupyter
@@ -410,9 +391,6 @@ Notebook files and not format them:
 === "pyproject.toml"
 
     ```toml
-    [tool.ruff]
-    extend-include = ["*.ipynb"]
-
     [tool.ruff.format]
     exclude = ["*.ipynb"]
     ```
@@ -420,8 +398,6 @@ Notebook files and not format them:
 === "ruff.toml"
 
     ```toml
-    extend-include = ["*.ipynb"]
-
     [format]
     exclude = ["*.ipynb"]
     ```
@@ -431,9 +407,6 @@ And, conversely, the following would only format Jupyter Notebook files and not 
 === "pyproject.toml"
 
     ```toml
-    [tool.ruff]
-    extend-include = ["*.ipynb"]
-
     [tool.ruff.lint]
     exclude = ["*.ipynb"]
     ```
@@ -441,15 +414,13 @@ And, conversely, the following would only format Jupyter Notebook files and not 
 === "ruff.toml"
 
     ```toml
-    extend-include = ["*.ipynb"]
-
     [lint]
     exclude = ["*.ipynb"]
     ```
 
-Alternatively, pass the notebook file(s) to `ruff` on the command-line directly. For example,
-`ruff check /path/to/notebook.ipynb` will always lint `notebook.ipynb`. Similarly,
-`ruff format /path/to/notebook.ipynb` will always format `notebook.ipynb`.
+Alternatively, passing the notebook file(s) to `ruff` on the command-line will always lint or format
+the notebook. For example, `ruff check /path/to/notebook.ipynb` will always lint `notebook.ipynb`.
+Similarly, `ruff format /path/to/notebook.ipynb` will always format `notebook.ipynb`.
 
 ## Command-line interface
 
