@@ -2,8 +2,9 @@ use std::borrow::Cow;
 
 use lsp_types::request::DocumentDiagnosticRequest;
 use lsp_types::{
-    Diagnostic, DocumentDiagnosticParams, DocumentDiagnosticReport, DocumentDiagnosticReportResult,
-    FullDocumentDiagnosticReport, Range, RelatedFullDocumentDiagnosticReport, Url,
+    Diagnostic, DiagnosticSeverity, DocumentDiagnosticParams, DocumentDiagnosticReport,
+    DocumentDiagnosticReportResult, FullDocumentDiagnosticReport, Position, Range,
+    RelatedFullDocumentDiagnosticReport, Url,
 };
 
 use red_knot_workspace::db::RootDatabase;
@@ -56,7 +57,33 @@ fn compute_diagnostics(snapshot: &DocumentSnapshot, db: &RootDatabase) -> Vec<Di
     diagnostics
         .as_slice()
         .iter()
-        .map(|message| Diagnostic {
+        .map(|message| to_lsp_diagnostic(message))
+        .collect()
+}
+
+fn to_lsp_diagnostic(message: &str) -> Diagnostic {
+    let words = message.split(':').collect::<Vec<_>>();
+
+    match words.as_slice() {
+        [_filename, line, column, message] => {
+            let line = line.parse::<u32>().unwrap_or_default();
+            let column = column.parse::<u32>().unwrap_or_default();
+            Diagnostic {
+                range: Range::new(
+                    Position::new(line.saturating_sub(1), column.saturating_sub(1)),
+                    Position::new(line, column),
+                ),
+                severity: Some(DiagnosticSeverity::ERROR),
+                tags: None,
+                code: None,
+                code_description: None,
+                source: Some("red-knot".into()),
+                message: message.trim().to_string(),
+                related_information: None,
+                data: None,
+            }
+        }
+        _ => Diagnostic {
             range: Range::default(),
             severity: None,
             tags: None,
@@ -66,6 +93,6 @@ fn compute_diagnostics(snapshot: &DocumentSnapshot, db: &RootDatabase) -> Vec<Di
             message: message.to_string(),
             related_information: None,
             data: None,
-        })
-        .collect()
+        },
+    }
 }
